@@ -1,0 +1,25 @@
+---
+- name: Intall apache and application
+  hosts: localhost
+  become: true
+  become_method: sudo
+  become_user: root
+  vars:
+    web_server: "httpd"
+
+  tasks:
+    - name: Install httpd package
+      yum:
+        name: "{{web_server}}"
+        state: latest
+
+    - name: Enable https service
+      systemd:
+        name: "{{web_server}}"
+        enabled: true
+        state: started
+
+    - name: Deploy web page
+      copy:
+        content: "<h1>welcome to packer , ansible, terraform and aws project<h2>"
+        dest: /var/www/html/index.html       
