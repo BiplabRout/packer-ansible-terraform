@@ -59,6 +59,7 @@
         /usr/bin/dotnet publish --configuration Release
         cp -rf ./bin/Release/netcoreapp2.1/* /root/myapp
         mv ./../myapp.service /etc/systemd/system/
+        mv ./../myapp.conf /etc/httpd/conf.d/
       args:
         chdir: /root/source_code/ProductManagementApi
 
@@ -67,3 +68,8 @@
         name: myapp.service
         enabled: true
         state: started
+
+    - name: Set APACHE CONFIGURATION
+      systemd:
+        name: httpd
+        state: restarted
