@@ -1,0 +1,54 @@
+---
+- name: Server setup using Ansible
+  hosts: localhost
+  become: true
+  become_method: sudo
+  become_user: root
+  vars:
+    web_server: "httpd"
+    dotnet_sdk: "dotnet-sdk-2.1"
+  tasks:
+    - name: Update packages
+      yum:
+        name: '*'
+        state: latest
+
+    - name: Install Apache
+      yum:
+        name: "{{web_server}}"
+        state: latest
+
+    - name: Install RPM PACKAGE TO GET DOTNET PACKAGE
+      yum:
+        name: https://packages.microsoft.com/config/centos/7/packages-microsoft-prod.rpm
+        state: latest
+
+    - name: Install DOTNET SDK
+      yum:
+        name: "{{dotnet_sdk}}"
+        state: present
+
+    - name: Enable APACHE SERVICE
+      systemd:
+        name: "{{web_server}}"
+        enabled: true
+        state: started
+
+    - name: Install GIT
+      yum:
+       name: git
+       state: latest
+
+    - name: Create MYAPP FOLDER
+      file:
+        path: /root/myapp
+        state: directory
+
+    - name: Clone Repository
+      git:
+        repo: https://github.com/BiplabRout/ProductManagementApi.git
+        dest: /root/myapp
+
+    - name: Build Project
+      script:
+        cmd: /usr/bin/dotnet publish --configuration Release /home/ec2-user/myapp/ProductManagementApi
