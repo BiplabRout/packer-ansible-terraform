@@ -39,6 +39,11 @@
        name: git
        state: latest
 
+    - name: Create SOURCE_CODE FOLDER
+      file:
+        path: /root/source_code
+        state: directory
+
     - name: Create MYAPP FOLDER
       file:
         path: /root/myapp
@@ -47,8 +52,18 @@
     - name: Clone Repository
       git:
         repo: https://github.com/BiplabRout/ProductManagementApi.git
-        dest: /root/myapp
+        dest: /root/source_code
 
     - name: Build Project
-      script:
-        cmd: /usr/bin/dotnet publish --configuration Release /home/ec2-user/myapp/ProductManagementApi
+      shell: |
+        /usr/bin/dotnet publish --configuration Release
+        cp -rf ./bin/Release/netcoreapp2.1/* /root/myapp
+        mv ./../myapp.service /etc/systemd/system/
+      args:
+        chdir: /root/source_code/ProductManagementApi
+
+    - name: Start APPLICATION SERVICE
+      systemd:
+        name: myapp.service
+        enabled: true
+        state: started
