@@ -1,9 +1,13 @@
 {
+  "variables": { 
+     "aws_acces_key": "",
+	 "aws_secret_key": ""
+  }  
   "builders": [
      {
        "type": "amazon-ebs",
-       "access_key": "",
-       "secret_key": "",
+	 "access_key": "{{user `aws_acces_key`}}",
+       "secret_key": "{{user `aws_secret_key`}}",
        "region": "eu-west-1",
        "ami_name": "apache_webserver",
        "source_ami": "ami-02b4e72b17337d6c1",
