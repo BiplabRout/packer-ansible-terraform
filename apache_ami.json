@@ -26,7 +26,7 @@
 
    {
      "type": "ansible-local",
-     "playbook_file" : "apache_install.yml"
+     "playbook_file" : "server_setup.yml"
    }
   ]
 }
