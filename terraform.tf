@@ -7,31 +7,24 @@ terraform {
  }
 }
 
+variable "access_key_req" {
+  type = string
+  sensitive = true
+  default = ""
+}
+variable "secret_key_req" {
+  type = string
+  sensitive = true
+  default = ""
+}
+
+
 provider "aws" {
- access_key = ""
- secret_key = ""
+ access_key = var.access_key_req
+ secret_key = var.secret_key_req
  region = "eu-west-1"
 }
 
-/*data "aws_ami" "myami" {
-  owners = ["100218182105"]
-  filter {
-    name = "virtualization-type"
-    values =  ["hvm"]
-  }
-  filter {
-    name = "name"
-    values = ["apache_webserver"]
-  }
-}
-
-resource "aws_instance" "myserevr" {
-  ami = data.aws_ami.myami.id
-  instance_type = "t2.micro"
-  tags = {
-   Name = "ApacheServer"
-  }
-}*/
 
 resource "aws_vpc" "myvpc" {
   cidr_block = "10.0.0.0/24"
@@ -108,4 +101,48 @@ resource "aws_route_table_association" "pub_sub_asso" {
 resource "aws_route_table_association" "pvt_sub_asso" {
   subnet_id = aws_subnet.pvt_sub.id
   route_table_id = aws_route_table.pvt_rt.id
+}
+
+resource "aws_security_group" "sg" {
+  vpc_id = aws_vpc.myvpc.id
+}
+
+resource "aws_security_group_rule" "ingress" {
+ type = "ingress"
+ security_group_id = aws_security_group.sg.id
+ protocol = "all"
+ to_port = 0
+ from_port = 0
+ cidr_blocks = ["0.0.0.0/0"]
+}
+
+resource "aws_security_group_rule" "egress" {
+ type = "egress"
+ security_group_id = aws_security_group.sg.id
+ protocol = "all"
+ to_port = 0
+ from_port = 0
+ cidr_blocks = ["0.0.0.0/0"]
+}
+
+data "aws_ami" "myami" {
+  owners = ["100218182105"]
+  filter {
+    name = "virtualization-type"
+    values =  ["hvm"]
+  }
+  filter {
+    name = "name"
+    values = ["apache_webserver"]
+  }
+}
+
+resource "aws_instance" "myserevr" {
+  ami = data.aws_ami.myami.id
+  instance_type = "t2.micro"
+  tags = {
+   Name = "ApacheServer"
+  }
+  subnet_id = aws_subnet.pub_sub.id
+  vpc_security_group_ids = [aws_security_group.sg.id]
 }
